@@ -18,7 +18,9 @@ For Mac users, you may need to install command line developer tools by running `
 
 Download the Shiny_IGOR folder to a local directory. To run the app, you can:
 1. Within RStudio, open the `ui.R`, `server.R`, or `global.R` files  and click the Run App button.
-2. From an R terminal, type `R -e "shiny::runApp('~/path_to_this_shiny_app')"`. You should see something like `http://127.0.0.1:6108` (the port number is randomly selected), and then navigate your browser to that address.
+2. From an R terminal, `R -e "shiny::runApp('~/path_to_this_shiny_app')"`
+3. From an R terminal, load the Shiny library (`library(shiny)`) then `runGitHub("Shiny_IGOR","shcaba")`
+From an R terminal, type `R -e "shiny::runApp('~/path_to_this_shiny_app')"`. You should see something like `http://127.0.0.1:6108` (the port number is randomly selected), and then navigate your browser to that address.
 
 ## How Do I Run A Growth Curve Model Analysis?
 
