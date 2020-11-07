@@ -106,21 +106,21 @@ opt <- function(obj, lower, upper) {
 
 # plot data points and the fitting curve for age and length
 plot_growth_curve <- function(rv, mode, model, age_unit, len_unit) {
-  age_max = max(rv$selected_data[c(-1, -2, -3, -4, -5)])
+  age_max = max(rv$selected_data[,-c(1:5)],na.rm = TRUE)
   # get current selected reads (the ones in the filtered data table)
-  reads_choices = names(rv$selected_data[c(-1, -2, -3, -4, -5)])
+  reads_choices = names(rv$selected_data[-c(1:5)])
   if (length(reads_choices) < 3) {
     # 2 greens that are not too pale
     palette = c("#41AB5D", "#238B45")
   } else {
     palette = brewer.pal(length(reads_choices), "Greens")
   }
-  colors = c("black", palette)
-  names(colors) = c("Expected", reads_choices)
+  colors.plot = c("black", palette)
+  names(colors.plot) = c("Expected", reads_choices)
   
-  p = ggplot(data = rv$selected_data) +
+  p = ggplot(data = rv$selected_data) + xlim(0,age_max)+
      labs(title = "Age and Growth Fit", x = paste0("Age (", age_unit, ")"), y = paste0("Length (", len_unit, ")"))
-    
+  
   for (i in reads_choices) {
     p = p + geom_point(mapping = aes_string(Species = "Species", Area = "Area", Sex = "Sex", x = i, y= "Length", color = paste("'", i, "'", sep = "")))
   }
@@ -134,27 +134,39 @@ plot_growth_curve <- function(rv, mode, model, age_unit, len_unit) {
     }
     if (!is.null(model_name)) {
       if (model_name == "vb") {
-        p = p + stat_function(fun = function(x) rep[1,1] * (1 - exp(-rep[2,1] * (x - rep[3,1]))),
-                              aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
+        line.vals<-rep[1,1] * (1 - exp(-rep[2,1] * (c(0:age_max) - rep[3,1])))
+        #p=p+geom_smooth(aes(x=rv$selected_data$Read1,y=rv$selected_data$Length))
+        p=p+geom_line(data=data.frame(xx=c(0:age_max),yy=line.vals),aes(x=xx,y=yy, color = "Expected"))
+        #p = p +stat_function(aes(color = "Expected",size=1.5),
+        #                       fun = function(xx) rep[1,1] * (1 - exp(-rep[2,1] * (xx - rep[3,1])))) 
       } else if (model_name == "gompertz") {
-        p = p + stat_function(fun = function(x) rep[1,1] * exp(-rep[2,1] * exp(-rep[3,1] * x)),
-                              aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
+        line.vals<-rep[1,1] * exp(-rep[2,1] * exp(-rep[3,1] *c(0:age_max)))
+        p=p+geom_line(data=data.frame(xx=c(0:age_max),yy=line.vals),aes(x=xx,y=yy, color = "Expected"))
+     #   p = p + stat_function(fun = function(x) rep[1,1] * exp(-rep[2,1] * exp(-rep[3,1] * x)),
+     #                         aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
       } else if (model_name == "logistic") {
-        p = p + stat_function(fun = function(x) rep[1,1] / (1 + rep[2,1] * exp(-rep[3,1] * x)),
-                              aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
+        line.vals<-rep[1,1] / (1 + rep[2,1] * exp(-rep[3,1] * c(0:age_max)))
+        p=p+geom_line(data=data.frame(xx=c(0:age_max),yy=line.vals),aes(x=xx,y=yy, color = "Expected"))
+        #p = p + stat_function(fun = function(x) rep[1,1] / (1 + rep[2,1] * exp(-rep[3,1] * x)),
+        #                      aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
       } else if (model_name == "linear") {
-        p = p + stat_function(fun = function(x) rep[1,1] + x * rep[2,1],
-                              aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
+        line.vals<-rep[1,1] + c(0:age_max) * rep[2,1]
+        p=p+geom_line(data=data.frame(xx=c(0:age_max),yy=line.vals),aes(x=xx,y=yy, color = "Expected"))
+      #  p = p + stat_function(fun = function(x) rep[1,1] + x * rep[2,1],
+      #                        aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
       } else { # model_name == "schnute"
-        p = p + stat_function(fun = function(x) (rep[1,1] + rep[2,1] * exp(rep[3,1] * x)) ** rep[4,1],
-                              aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
+        line.vals<-(rep[1,1] + rep[2,1] * exp(rep[3,1] * c(0:age_max))) ** rep[4,1]
+        p=p+geom_line(data=data.frame(xx=c(0:age_max),yy=line.vals),aes(x=xx,y=yy, color = "Expected"))
+      #  p = p + stat_function(fun = function(x) (rep[1,1] + rep[2,1] * exp(rep[3,1] * x)) ** rep[4,1],
+      #                        aes(x = x, color = "Expected"), data = data.frame(x = c(0, age_max))) 
       }
     } 
   }
-  p = p + scale_colour_manual(name = "", values = colors)
+  p = p + scale_colour_manual(name = "", values = colors.plot)
+  #return(p)
   return(ggplotly(p, tooltip = c("x", "y", "Species", "Area", "Sex"))  %>%
            layout(font = list(family = "'Times New Roman', 'arial', 'Raleway','verdana'")) %>%
            plotly::config(modeBarButtonsToRemove = 
                             list("sendDataToCloud", "zoom2d", "pan2d", "select2d", "lasso2d", "zoomIn2d", "zoomOut2d", "autoScale2d",
-                                 "resetScale2d", "hoverCompareCartesian", "hoverClosestCartesian"), displaylogo = FALSE, collaborate = FALSE))
+                                 "resetScale2d", "hoverCompareCartesian", "hoverClosestCartesian"), displaylogo = FALSE))
 }
