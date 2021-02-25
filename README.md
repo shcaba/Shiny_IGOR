@@ -5,14 +5,14 @@ IGOR is an R Shiny tool that allows you to do the following tasks:
 2. Estimate an Otolith Weight vs. Age predictive model (linear or piecewise) with user data.
 3. Use an existing Otolith Weight vs. Age model to predict ages for fish with known otolith weights.
 
-## Prerequisite
+## Installing libraries and Rtools
+install.packages(c("shiny","jsonlite","shinycssloaders","shinyjs","segmented","ggplot2","RColorBrewer","plotly"."DT","reshape2","TMB","htmlwidgets","htmltools"))
 
-Install TMB (https://github.com/kaskr/adcomp/wiki/Download) using the `install.packages("TMB")` command in the R terminal.
-<br></br>
 TMB requires the installation of Rtools, a program which contains a C++ compiler.
 For Windows users, you should have Rtools installed. During installation, you need to edit the `PATH` variable to make sure that `c:\Rtools\bin;`, and `c:\Rtools\mingw_64\bin;` or `c:\Rtools\mingw_32\bin;` (64-bit or 32-bit version) are included in `PATH` as these directories contain the C++ gcc compiler. The command `Sys.getenv("PATH")` can be used in R to check you `PATH` variables. For futher directions, refer to [Install Rtools for Windows](https://github.com/kaskr/adcomp/wiki/Windows-installation).
 <br></br>
 For Mac users, you may need to install command line developer tools by running `xcode-select --install` in a terminal.
+
 
 ## How To Run The App
 
